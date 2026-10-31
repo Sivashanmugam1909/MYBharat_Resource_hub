@@ -1,7 +1,6 @@
 name: Build MY Bharat Android APK
 
-on:
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 jobs:
   build:
@@ -25,16 +24,15 @@ jobs:
       - name: Extract Android project
         run: |
           unzip -o MYBharat_TN_Mobile_Build_Project.zip -d extracted
-          find extracted -maxdepth 4 -type f | head -80
-
-      - name: Locate project
-        run: |
           find extracted -name settings.gradle -o -name settings.gradle.kts
 
       - name: Build APK
         run: |
           PROJECT_DIR=$(dirname "$(find extracted -name settings.gradle -print -quit)")
-          echo "Project directory: $PROJECT_DIR"
+          if [ "$PROJECT_DIR" = "extracted" ]; then
+            echo "Android project not found in ZIP"
+            exit 1
+          fi
           cd "$PROJECT_DIR"
           gradle assembleDebug
 
